@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ordem de Serviço</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .form-section h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ORDEM DE SERVIÇO Nº {{ ordem_servico_id }}</h1>
+
+        <!-- Informações da Unidade -->
+        <div class="form-section">
+            <h2>Informações da Unidade</h2>
+            <table>
+                <tr>
+                    <th>Unidade:</th>
+                    <td>{{ unidade }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Demandas Vinculadas -->
+        <div class="form-section">
+            <h2>Demandas Vinculadas</h2>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Descrição</th>
+                </tr>
+                {% for demanda in demandas %}
+                <tr>
+                    <td>{{ demanda.id }}</td>
+                    <td>{{ demanda.descricao }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- Técnicos Responsáveis -->
+        <div class="form-section">
+            <h2>Técnicos Responsáveis</h2>
+            <form id="tecnicos_form" method="post" action="{{ url_for('criar_ordem') }}">
+                <table>
+                    <tr>
+                        <th>Técnico:</th>
+                        <td>
+                            <select name="tecnico_id" required>
+                                {% for tecnico in tecnicos %}
+                                <option value="{{ tecnico.id }}">{{ tecnico.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Data de Atendimento:</th>
+                        <td>
+                            <input type="date" name="data_atendimento" required>
+                        </td>
+                    </tr>
+                </table>
+        </div>
+
+        <!-- Confirmação -->
+        <div class="form-section">
+            <h2>Confirmação</h2>
+            <input type="hidden" name="demanda_ids" value="{{ demanda_ids|join(',') }}">
+            <button type="submit">Confirmar Criação da Ordem de Serviço</button>
+        </form>
+        </div>
+    </div>
+</body>
+</html>

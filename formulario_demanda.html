@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cadastro de Nova Demanda</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Cadastro de Nova Demanda</h1>
+    <form action="{{ url_for('formulario_demanda') }}" method="post">
+        <label for="unidade">Unidade:</label>
+        <select id="unidade" name="unidade" required>
+            {% for unidade in unidades %}
+                <option value="{{ unidade.id }}">{{ unidade.nome }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="tipo_servico">Tipo de Serviço:</label>
+        <select id="tipo_servico" name="tipo_servico" required>
+            <option value="Climatização">Climatização</option>
+            <option value="Hidrossanitário">Hidrossanitário</option>
+            <option value="Elétrico">Elétrico</option>
+            <option value="Comunicação Visual">Comunicação Visual</option>
+            <option value="Layout">Layout</option>
+            <option value="Infraestrutura Predial">Infraestrutura Predial</option>
+            <option value="Dados e Telefonia">Dados e Telefonia</option>
+            <option value="CERCON/Extintores">CERCON/Extintores</option>
+        </select>
+
+        <label for="descricao">Descrição:</label>
+        <textarea id="descricao" name="descricao" rows="4" cols="50" required></textarea>
+
+        <input type="submit" value="Criar Demanda">
+    </form>
+</body>
+</html>
