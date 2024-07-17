@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ordem de Serviço #{{ ordem_servico.id }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Ordem de Serviço #{{ ordem_servico.id }}</h1>
+        <p><strong>Unidade:</strong> {{ unidade.nome }}</p>
+        <p><strong>Data de Criação:</strong> {{ ordem_servico.data_criacao }}</p>
+        <p><strong>Data de Previsão de Atendimento:</strong> {{ ordem_servico.data_previsao }}</p>
+        <p><strong>Técnicos Responsáveis:</strong></p>
+        <ul>
+            {% for tecnico in tecnicos %}
+                <li>{{ tecnico.nome }}</li>
+            {% endfor %}
+        </ul>
+        <h3>Demandas:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Descrição</th>
+                    <th>Tipo de Serviço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for demanda in demandas %}
+                <tr>
+                    <td>{{ demanda.id }}</td>
+                    <td>{{ demanda.descricao }}</td>
+                    <td>{{ demanda.tipo_servico }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h3>Observações:</h3>
+        <p>{{ ordem_servico.observacoes }}</p>
+        <a href="{{ url_for('gerar_pdf', ordem_servico_id=ordem_servico.id) }}" class="button">Gerar PDF</a>
+    </div>
+</body>
+</html>

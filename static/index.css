@@ -1,0 +1,62 @@
+/* Estilos Gerais */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* Container Principal */
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Título Principal */
+h1 {
+    text-align: center;
+    color: #333333;
+}
+
+/* Lista de Links */
+ul {
+    list-style: none;
+    padding: 0;
+    text-align: center; /* Centraliza a lista */
+}
+
+li {
+    margin: 10px 0;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+    color: #007BFF;
+    font-weight: bold;
+    display: inline-block; /* Altera para inline-block para centralizar */
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+a:hover {
+    background-color: #007BFF;
+    color: #ffffff;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        padding: 10px;
+    }
+
+    a {
+        text-align: center;
+    }
+}
