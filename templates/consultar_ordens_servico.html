@@ -3,139 +3,140 @@
 {% block title %}Consultar Ordens de Serviço{% endblock %}
 
 {% block content %}
-        <h1>Consultar Ordens de Serviço</h1>
-        <form id="filterForm" class="p-3">
-            <div class="form-row mb-3">
-                <div class="form-group col-md-6">
-                    <label for="ordem_servico_id_filter">ID da Ordem de Serviço:</label>
-                    <input type="text" class="form-control" name="ordem_servico_id_filter" id="ordem_servico_id_filter">
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="unidade_filter">Unidade:</label>
-                    <select class="form-control" name="unidade_filter" id="unidade_filter">
-                        <option value="">Todas</option>
-                        {% for unidade in unidades %}
-                        <option value="{{ unidade.id }}">{{ unidade.nome }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="form-row mb-3">
-                <div class="form-group col-md-6">
-                    <label for="data_criacao_filter">Data de Criação:</label>
-                    <input type="date" class="form-control" name="data_criacao_filter" id="data_criacao_filter">
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="data_previsao_filter">Data de Previsão:</label>
-                    <input type="date" class="form-control" name="data_previsao_filter" id="data_previsao_filter">
-                </div>
-            </div>
-        </form>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Unidade</th>
-                    <th>Data de Criação</th>
-                    <th>Data de Previsão</th>
-                    <th>Observações</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="ordensTableBody">
-                {% for ordem in ordens_servico %}
-                <tr>
-                    <td>{{ ordem.ordem_servico_id }}</td>
-                    <td>{{ ordem.unidade_nome }}</td>
-                    <td>{{ ordem.data_criacao }}</td>
-                    <td>{{ ordem.data_previsao }}</td>
-                    <td>{{ ordem.observacoes }}</td>
-                    <td style="text-align: center;">
-                        <button class="btn btn-primary button-visualizar" data-id="{{ ordem.ordem_servico_id }}">Visualizar</button>
-                    </td>
-                </tr>
+<h1>Consultar Ordens de Serviço</h1>
+<form id="filterForm" class="p-3">
+    <div class="form-row mb-3">
+        <div class="form-group col-md-6">
+            <label for="ordem_servico_id_filter">ID da Ordem de Serviço:</label>
+            <input type="text" class="form-control" name="ordem_servico_id_filter" id="ordem_servico_id_filter">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="unidade_filter">Unidade:</label>
+            <select class="form-control" name="unidade_filter" id="unidade_filter">
+                <option value="">Todas</option>
+                {% for unidade in unidades %}
+                <option value="{{ unidade.id }}">{{ unidade.nome }}</option>
                 {% endfor %}
-            </tbody>
-        </table>
+            </select>
+        </div>
+    </div>
+    <div class="form-row mb-3">
+        <div class="form-group col-md-6">
+            <label for="data_criacao_filter">Data de Criação:</label>
+            <input type="date" class="form-control" name="data_criacao_filter" id="data_criacao_filter">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="data_previsao_filter">Data de Previsão:</label>
+            <input type="date" class="form-control" name="data_previsao_filter" id="data_previsao_filter">
+        </div>
+    </div>
+</form>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Unidade</th>
+            <th>Data de Criação</th>
+            <th>Data de Previsão</th>
+            <th>Observações</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="ordensTableBody">
+        {% for ordem in ordens_servico %}
+        <tr>
+            <td>{{ ordem.ordem_servico_id }}</td>
+            <td>{{ ordem.unidade_nome }}</td>
+            <td>{{ ordem.data_criacao }}</td>
+            <td>{{ ordem.data_previsao }}</td>
+            <td>{{ ordem.observacoes }}</td>
+            <td style="text-align: center;">
+                <button class="btn btn-primary button-visualizar" data-id="{{ ordem.ordem_servico_id }}">Editar</button>
+                <a href="{{ url_for('gerar_pdf', ordem_servico_id=ordem.ordem_servico_id) }}" class="btn btn-secondary">Download PDF</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-    <!-- Modal -->
-    <div class="modal fade" id="ordemServicoModal" tabindex="-1" role="dialog" aria-labelledby="ordemServicoModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ordemServicoModalLabel">Detalhes da Ordem de Serviço</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Formulário de edição de ordem de serviço -->
-                    <form id="ordemServicoForm">
-                        <input type="hidden" id="ordem_servico_id" name="ordem_servico_id">
-                        <div class="form-group">
-                            <label for="unidade_nome">Unidade</label>
-                            <input type="text" class="form-control" id="unidade_nome" name="unidade_nome" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="data_criacao">Data de Criação</label>
-                            <input type="date" class="form-control" id="data_criacao" name="data_criacao">
-                        </div>
-                        <div class="form-group">
-                            <label for="data_previsao">Data de Previsão</label>
-                            <input type="date" class="form-control" id="data_previsao" name="data_previsao">
-                        </div>
-                        <div class="form-group">
-                            <label for="observacoes">Observações</label>
-                            <textarea class="form-control" id="observacoes" name="observacoes"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Salvar</button>
-                    </form>
-                </div>
+<!-- Modal -->
+<div class="modal fade" id="ordemServicoModal" tabindex="-1" role="dialog" aria-labelledby="ordemServicoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ordemServicoModalLabel">Detalhes da Ordem de Serviço</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulário de edição de ordem de serviço -->
+                <form id="ordemServicoForm">
+                    <input type="hidden" id="ordem_servico_id" name="ordem_servico_id">
+                    <div class="form-group">
+                        <label for="unidade_nome">Unidade</label>
+                        <input type="text" class="form-control" id="unidade_nome" name="unidade_nome" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="data_criacao">Data de Criação</label>
+                        <input type="date" class="form-control" id="data_criacao" name="data_criacao">
+                    </div>
+                    <div class="form-group">
+                        <label for="data_previsao">Data de Previsão</label>
+                        <input type="date" class="form-control" id="data_previsao" name="data_previsao">
+                    </div>
+                    <div class="form-group">
+                        <label for="observacoes">Observações</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        $(document).ready(function(){
-            $('#filterForm input, #filterForm select').on('change', function(){
-                $.ajax({
-                    url: '/consultar_ordens_servico',
-                    method: 'POST',
-                    data: $('#filterForm').serialize(),
-                    success: function(response){
-                        $('#ordensTableBody').html(response);
-                    }
-                });
-            });
-
-            $(document).on('click', '.button-visualizar', function(){
-                var ordemServicoId = $(this).data('id');
-                $.ajax({
-                    url: '/ordem_servico/' + ordemServicoId,
-                    method: 'GET',
-                    success: function(response){
-                        $('#ordem_servico_id').val(response.ordem_servico_id);
-                        $('#unidade_nome').val(response.unidade_nome);
-                        $('#data_criacao').val(response.data_criacao);
-                        $('#data_previsao').val(response.data_previsao);
-                        $('#observacoes').val(response.observacoes);
-                        $('#ordemServicoModal').modal('show');
-                    }
-                });
-            });
-
-            $('#ordemServicoForm').on('submit', function(e){
-                e.preventDefault();
-                $.ajax({
-                    url: '/atualizar_ordem_servico',
-                    method: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response){
-                        $('#ordemServicoModal').modal('hide');
-                        location.reload();
-                    }
-                });
+<script>
+    $(document).ready(function(){
+        $('#filterForm input, #filterForm select').on('change', function(){
+            $.ajax({
+                url: '/consultar_ordens_servico',
+                method: 'POST',
+                data: $('#filterForm').serialize(),
+                success: function(response){
+                    $('#ordensTableBody').html(response);
+                }
             });
         });
-    </script>
+
+        $(document).on('click', '.button-visualizar', function(){
+            var ordemServicoId = $(this).data('id');
+            $.ajax({
+                url: '/ordem_servico/' + ordemServicoId,
+                method: 'GET',
+                success: function(response){
+                    $('#ordem_servico_id').val(response.ordem_servico_id);
+                    $('#unidade_nome').val(response.unidade_nome);
+                    $('#data_criacao').val(response.data_criacao);
+                    $('#data_previsao').val(response.data_previsao);
+                    $('#observacoes').val(response.observacoes);
+                    $('#ordemServicoModal').modal('show');
+                }
+            });
+        });
+
+        $('#ordemServicoForm').on('submit', function(e){
+            e.preventDefault();
+            $.ajax({
+                url: '/atualizar_ordem_servico',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function(response){
+                    $('#ordemServicoModal').modal('hide');
+                    location.reload();
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
