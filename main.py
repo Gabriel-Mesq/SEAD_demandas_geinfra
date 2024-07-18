@@ -144,9 +144,6 @@ def criar_ordem_servico():
 
 
 
-
-
-
 @app.route('/ver_ordem_servico/<int:ordem_servico_id>', methods=['GET'])
 def ver_ordem_servico(ordem_servico_id):
     conn = get_db_connection()
@@ -240,6 +237,45 @@ def gerar_pdf(ordem_servico_id):
 @app.route('/cadastro_tecnico')
 def cadastro_tecnico():
     return render_template('cadastro_tecnico.html')
+
+@app.route('/cadastro_tecnico_form', methods=['GET', 'POST'])
+def cadastro_tecnico_form():
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        especialidade = request.form.get('especialidade')
+        contato = request.form.get('contato')
+
+        # Logs for debugging
+        app.logger.info(f'nome: {nome}')
+        app.logger.info(f'especialidade: {especialidade}')
+        app.logger.info(f'contato: {contato}')
+
+        # Check if any required field is missing
+        if not nome or not especialidade or not contato:
+            return "Erro: Todos os campos são obrigatórios.", 400
+
+        # Insert the new technician into the database
+        cursor.execute('INSERT INTO tecnico (nome) VALUES (%s)',
+                       (nome))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return redirect(url_for('cadastro_tecnico_success'))
+
+    cursor.close()
+    conn.close()
+
+    return render_template('cadastro_tecnico.html')
+
+@app.route('/cadastro_tecnico_success')
+def cadastro_tecnico_success():
+    return "Técnico cadastrado com sucesso!"
+
 
 @app.route('/consultar_ordens_servico', methods=['GET', 'POST'])
 def consultar_ordens_servico():
