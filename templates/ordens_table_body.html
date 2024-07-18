@@ -1,0 +1,12 @@
+{% for ordem in ordens_servico %}
+                <tr>
+                    <td>{{ ordem.ordem_servico_id }}</td>
+                    <td>{{ ordem.unidade_nome }}</td>
+                    <td>{{ ordem.data_criacao }}</td>
+                    <td>{{ ordem.data_previsao }}</td>
+                    <td>{{ ordem.observacoes }}</td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-primary button-visualizar" data-id="{{ ordem.ordem_servico_id }}">Visualizar</button>
+                    </td>
+                </tr>
+                {% endfor %}

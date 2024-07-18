@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizar Ordem de Serviço</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Visualizar Ordem de Serviço</h1>
+        <table>
+            <tr>
+                <th>ID</th>
+                <td>{{ ordem_servico.ordem_servico_id }}</td>
+            </tr>
+            <tr>
+                <th>Unidade</th>
+                <td>{{ ordem_servico.unidade_nome }}</td>
+            </tr>
+            <tr>
+                <th>Data de Criação</th>
+                <td>{{ ordem_servico.data_criacao }}</td>
+            </tr>
+            <tr>
+                <th>Data de Previsão</th>
+                <td>{{ ordem_servico.data_previsao }}</td>
+            </tr>
+            <tr>
+                <th>Observações</th>
+                <td>{{ ordem_servico.observacoes }}</td>
+            </tr>
+        </table>
+        <a href="{{ url_for('consultar_ordens_servico') }}">Voltar</a>
+    </div>
+</body>
+</html>

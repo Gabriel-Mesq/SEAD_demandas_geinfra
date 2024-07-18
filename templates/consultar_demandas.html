@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Consultar Demandas</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <div class="container">
+{% extends "header.html" %}
+
+{% block title %}Consultar Ordens de Serviço{% endblock %}
+
+{% block content %}
         <h1>Consultar Demandas</h1>
-        <form method="post">
+        <form id="filterForm" class="p-3">
             <div>
                 <label for="id_filter">ID:</label>
                 <input type="text" name="id_filter" id="id_filter">
@@ -44,18 +40,11 @@
                 <label for="data_filter">Data:</label>
                 <input type="date" name="data_filter" id="data_filter">
             </div>
-            <div>
-                <button type="submit" name="filtrar">Filtrar</button>
-            </div>
         </form>
         <form method="post" action="{{ url_for('consultar_demandas') }}">
-            <div>
-                <button type="submit" name="criar_ordem_servico">Criar Ordem de Serviço</button>
-            </div>
             <table>
                 <thead>
                     <tr>
-                        <th>Selecionar</th>
                         <th>ID</th>
                         <th>Unidade</th>
                         <th>Tipo de Serviço</th>
@@ -64,10 +53,9 @@
                         <th>Data</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="demandasTableBody">
                     {% for demanda in demandas %}
                     <tr>
-                        <td><input type="checkbox" name="demanda_ids" value="{{ demanda.id }}"></td>
                         <td>{{ demanda.id }}</td>
                         <td>{{ demanda.unidade_nome }}</td>
                         <td>{{ demanda.tipo_servico }}</td>
@@ -83,6 +71,19 @@
             <p>{{ mensagem }}</p>
             {% endif %}
         </form>
-    </div>
-</body>
-</html>
+
+    <script>
+        $(document).ready(function(){
+            $('#filterForm input, #filterForm select').on('change', function(){
+                $.ajax({
+                    url: '/consultar_demandas',
+                    method: 'POST',
+                    data: $('#filterForm').serialize(),
+                    success: function(response){
+                        $('#demandasTableBody').html(response);
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

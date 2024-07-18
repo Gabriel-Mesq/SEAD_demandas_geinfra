@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, make_response
+from flask import Flask, render_template, request, redirect, url_for, make_response, jsonify
 import pdfkit
 import pymysql
 import logging
@@ -44,45 +44,38 @@ def consultar_demandas():
     params = []
 
     if request.method == 'POST':
-        if 'filtrar' in request.form:
-            id_filter = request.form.get('id_filter')
-            unidade_filter = request.form.get('unidade_filter')
-            tipo_servico_filter = request.form.get('tipo_servico_filter')
-            status_filter = request.form.get('status_filter')
-            data_filter = request.form.get('data_filter')
+        id_filter = request.form.get('id_filter')
+        unidade_filter = request.form.get('unidade_filter')
+        tipo_servico_filter = request.form.get('tipo_servico_filter')
+        status_filter = request.form.get('status_filter')
+        data_filter = request.form.get('data_filter')
 
-            if id_filter:
-                filters.append('d.id = %s')
-                params.append(id_filter)
-            if unidade_filter:
-                filters.append('d.unidade_id = %s')
-                params.append(unidade_filter)
-            if tipo_servico_filter:
-                filters.append('d.tipo_servico_id = %s')
-                params.append(tipo_servico_filter)
-            if status_filter:
-                filters.append('d.status_id = %s')
-                params.append(status_filter)
-            if data_filter:
-                filters.append('DATE(d.data) = %s')
-                params.append(data_filter)
+        if id_filter:
+            filters.append('d.id = %s')
+            params.append(id_filter)
+        if unidade_filter:
+            filters.append('d.unidade_id = %s')
+            params.append(unidade_filter)
+        if tipo_servico_filter:
+            filters.append('d.tipo_servico_id = %s')
+            params.append(tipo_servico_filter)
+        if status_filter:
+            filters.append('d.status_id = %s')
+            params.append(status_filter)
+        if data_filter:
+            filters.append('DATE(d.data) = %s')
+            params.append(data_filter)
 
-            if filters:
-                query += ' WHERE ' + ' AND '.join(filters)
-
-        if 'criar_ordem_servico' in request.form:
-            demanda_ids = request.form.getlist('demanda_ids')
-            unidade_id = request.form.get('unidade_id')
-            if demanda_ids and unidade_id:
-                return redirect(url_for('criar_ordem_servico', demanda_ids=','.join(demanda_ids), unidade_id=unidade_id))
-            else:
-                mensagem = "Nenhuma demanda selecionada"
-                return render_template('consultar_demandas.html', unidades=unidades, tipos_servico=tipos_servico, status=status, demandas=demandas, mensagem=mensagem)
+        if filters:
+            query += ' WHERE ' + ' AND '.join(filters)
 
     cursor.execute(query, params)
     demandas = cursor.fetchall()
     cursor.close()
     conn.close()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('demandas_table_body.html', demandas=demandas)
 
     return render_template('consultar_demandas.html', unidades=unidades, tipos_servico=tipos_servico, status=status, demandas=demandas)
 
@@ -90,20 +83,16 @@ def consultar_demandas():
 
 
 
+
+
 @app.route('/criar_ordem_servico', methods=['GET', 'POST'])
 def criar_ordem_servico():
-    demanda_ids = request.args.get('demanda_ids')
-    unidade_id = request.args.get('unidade_id')
-
-    if not demanda_ids:
-        return "Erro: Nenhuma demanda selecionada.", 400
-
-    demanda_ids = demanda_ids.split(',')
-
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
 
     if request.method == 'POST':
+        unidade_id = request.form.get('unidade_id')
+        demanda_ids = request.form.getlist('demanda_ids')
         data_previsao = request.form.get('data_previsao')
         tecnicos_ids = request.form.getlist('tecnicos')
         observacoes = request.form.get('observacoes')
@@ -116,8 +105,8 @@ def criar_ordem_servico():
         app.logger.info(f'observacoes: {observacoes}')
 
         # Verificação se unidade_id está None
-        if not unidade_id:
-            return "Erro: Unidade não especificada.", 400
+        if not unidade_id or not demanda_ids:
+            return "Erro: Unidade ou Demanda(s) não especificada(s).", 400
 
         # Insere a nova ordem de serviço no banco de dados
         cursor.execute('INSERT INTO ordem_servico (unidade_id, data_previsao, observacoes) VALUES (%s, %s, %s)',
@@ -138,16 +127,11 @@ def criar_ordem_servico():
 
         return redirect(url_for('ver_ordem_servico', ordem_servico_id=ordem_servico_id))
 
-    cursor.execute('SELECT id, nome FROM unidades WHERE id = %s', (unidade_id,))
-    unidade = cursor.fetchone()
+    cursor.execute('SELECT id, nome FROM unidades')
+    unidades = cursor.fetchall()
 
-    cursor.execute('''
-    SELECT d.id, d.descricao, ts.descricao as tipo_servico 
-    FROM demandas d 
-    JOIN tiposservico ts ON d.tipo_servico_id = ts.id 
-    WHERE d.id IN (%s)
-    ''' % ','.join('%s' for _ in demanda_ids), demanda_ids)
-    demandas = cursor.fetchall()
+    cursor.execute('SELECT id, descricao FROM demandas')
+    todas_demandas = cursor.fetchall()
 
     cursor.execute('SELECT id, nome FROM tecnico')
     tecnicos = cursor.fetchall()
@@ -155,7 +139,8 @@ def criar_ordem_servico():
     cursor.close()
     conn.close()
 
-    return render_template('criar_ordem_servico.html', unidade=unidade, demandas=demandas, tecnicos=tecnicos)
+    return render_template('criar_ordem_servico.html', unidades=unidades, todas_demandas=todas_demandas, tecnicos=tecnicos)
+
 
 
 
@@ -275,11 +260,6 @@ def consultar_ordens_servico():
         data_criacao_filter = request.form.get('data_criacao_filter')
         data_previsao_filter = request.form.get('data_previsao_filter')
 
-        app.logger.info(f'Filtro ID: {ordem_servico_id_filter}')
-        app.logger.info(f'Filtro Unidade: {unidade_filter}')
-        app.logger.info(f'Filtro Data de Criação: {data_criacao_filter}')
-        app.logger.info(f'Filtro Data de Previsão: {data_previsao_filter}')
-
         if ordem_servico_id_filter:
             filters.append('os.id = %s')
             params.append(ordem_servico_id_filter)
@@ -296,13 +276,13 @@ def consultar_ordens_servico():
         if filters:
             query += ' WHERE ' + ' AND '.join(filters)
 
-    app.logger.info(f'Query: {query}')
-    app.logger.info(f'Params: {params}')
-
     cursor.execute(query, params)
     ordens_servico = cursor.fetchall()
     cursor.close()
     conn.close()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template('ordens_table_body.html', ordens_servico=ordens_servico)
 
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -313,9 +293,56 @@ def consultar_ordens_servico():
 
     return render_template('consultar_ordens_servico.html', ordens_servico=ordens_servico, unidades=unidades)
 
+@app.route('/ordem_servico/<int:id>', methods=['GET'])
+def visualizar_ordem_servico(id):
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    query = '''
+    SELECT os.id as ordem_servico_id, u.nome as unidade_nome, os.data_criacao, os.data_previsao, os.observacoes
+    FROM ordem_servico os 
+    JOIN unidades u ON os.unidade_id = u.id
+    WHERE os.id = %s
+    '''
+    
+    cursor.execute(query, (id,))
+    ordem_servico = cursor.fetchone()
+    cursor.close()
+    conn.close()
 
+    if ordem_servico is None:
+        return jsonify({'error': 'Ordem de Serviço não encontrada'}), 404
+
+    # Formatando as datas para o formato YYYY-MM-DD
+    ordem_servico['data_criacao'] = ordem_servico['data_criacao'].strftime('%Y-%m-%d') if ordem_servico['data_criacao'] else ''
+    ordem_servico['data_previsao'] = ordem_servico['data_previsao'].strftime('%Y-%m-%d') if ordem_servico['data_previsao'] else ''
+
+    return jsonify(ordem_servico)
+
+@app.route('/atualizar_ordem_servico', methods=['POST'])
+def atualizar_ordem_servico():
+    ordem_servico_id = request.form.get('ordem_servico_id')
+    data_criacao = request.form.get('data_criacao')
+    data_previsao = request.form.get('data_previsao')
+    observacoes = request.form.get('observacoes')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    query = '''
+    UPDATE ordem_servico
+    SET data_criacao = %s, data_previsao = %s, observacoes = %s
+    WHERE id = %s
+    '''
+    
+    cursor.execute(query, (data_criacao, data_previsao, observacoes, ordem_servico_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({'success': 'Ordem de Serviço atualizada com sucesso'})
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    app.run(debug=True, port=8000)
 

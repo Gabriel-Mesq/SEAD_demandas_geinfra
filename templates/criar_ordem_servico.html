@@ -1,54 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Criar Ordem de Serviço</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Criar Ordem de Serviço</h1>
-        <h2>Unidade: {{ unidade.nome }}</h2>
-        <form method="post">
-            <div>
-                <label for="data_previsao">Data de Previsão:</label>
-                <input type="date" name="data_previsao" id="data_previsao" required>
-            </div>
-            <div>
-                <label for="tecnicos">Técnicos:</label>
-                <select name="tecnicos" id="tecnicos" multiple required>
-                    {% for tecnico in tecnicos %}
-                    <option value="{{ tecnico.id }}">{{ tecnico.nome }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label for="observacoes">Observações:</label>
-                <textarea name="observacoes" id="observacoes" rows="4"></textarea>
-            </div>
-            <div>
-                <button type="submit">Confirmar Criação da Ordem de Serviço</button>
-            </div>
-        </form>
-        <h3>Demandas:</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Descrição</th>
-                    <th>Tipo de Serviço</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for demanda in demandas %}
-                <tr>
-                    <td>{{ demanda.id }}</td>
-                    <td>{{ demanda.descricao }}</td>
-                    <td>{{ demanda.tipo_servico }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% extends "header.html" %}
+
+{% block title %}Criar Ordem de Serviço{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Criar Ordem de Serviço</h1>
+<form method="post">
+    <div class="form-group">
+        <label for="unidade_id">Unidade:</label>
+        <select class="form-control" name="unidade_id" id="unidade_id" required>
+            <option value="">Selecione uma unidade</option>
+            {% for unidade in unidades %}
+            <option value="{{ unidade.id }}">{{ unidade.nome }}</option>
+            {% endfor %}
+        </select>
     </div>
-</body>
-</html>
+    <div class="form-group">
+        <label for="data_previsao">Data de Previsão:</label>
+        <input type="date" class="form-control" name="data_previsao" id="data_previsao" required>
+    </div>
+    <div class="form-group">
+        <label for="tecnicos">Técnicos:</label>
+        <select class="form-control" name="tecnicos" id="tecnicos" multiple required>
+            {% for tecnico in tecnicos %}
+            <option value="{{ tecnico.id }}">{{ tecnico.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="demanda_ids">Demandas:</label>
+        <select class="form-control" name="demanda_ids" id="demanda_ids" multiple required>
+            {% for demanda in todas_demandas %}
+            <option value="{{ demanda.id }}">{{ demanda.descricao }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="observacoes">Observações:</label>
+        <textarea class="form-control" name="observacoes" id="observacoes" rows="4"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Confirmar Criação da Ordem de Serviço</button>
+</form>
+{% endblock %}

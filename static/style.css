@@ -58,3 +58,21 @@ button {
 button:hover {
     background-color: #004d00; /* Verde mais escuro */
 }
+
+.button-visualizar {
+    background-color: #4CAF50; /* Cor de fundo */
+    color: white; /* Cor do texto */
+    padding: 10px 20px; /* Espaçamento interno */
+    text-align: center; /* Alinhamento do texto */
+    text-decoration: none; /* Remover sublinhado */
+    display: inline-block; /* Exibição inline */
+    font-size: 16px; /* Tamanho da fonte */
+    margin: 4px 2px; /* Margens */
+    cursor: pointer; /* Cursor de ponteiro */
+    border-radius: 8px; /* Borda arredondada */
+    border: none; /* Remover borda */
+}
+
+.button-visualizar:hover {
+    background-color: #45a049; /* Cor de fundo ao passar o mouse */
+}
