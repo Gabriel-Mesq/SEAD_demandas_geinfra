@@ -1,0 +1,59 @@
+{% extends "header.html" %}
+
+{% block title %}Cadastro de Demanda{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Cadastro de Demanda</h1>
+    <form action="{{ url_for('cadastro_demanda_form') }}" method="post">
+        <div class="form-group">
+            <label for="unidade_id">Unidade:</label>
+            <select class="form-control" id="unidade_id" name="unidade_id" required>
+                <option value="">Selecione a unidade</option>
+                {% for unidade in unidades %}
+                <option value="{{ unidade.id }}">{{ unidade.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="tipo_servico_id">Tipo de Serviço:</label>
+            <select class="form-control" id="tipo_servico_id" name="tipo_servico_id" required>
+                <option value="">Selecione o tipo de serviço</option>
+                {% for tipo_servico in tipos_servico %}
+                <option value="{{ tipo_servico.id }}">{{ tipo_servico.descricao }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="descricao">Descrição:</label>
+            <textarea class="form-control" id="descricao" name="descricao" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="status_id">Status:</label>
+            <select class="form-control" id="status_id" name="status_id" required>
+                <option value="">Selecione o status</option>
+                {% for stat in status %}
+                <option value="{{ stat.id }}">{{ stat.descricao }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="data">Data:</label>
+            <input type="date" class="form-control" id="data" name="data" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Cadastrar Demanda</button>
+    </form>
+</div>
+
+{% if success %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    Swal.fire({
+        title: 'Cadastro concluído!',
+        text: 'Demanda cadastrada com sucesso!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+{% endif %}
+{% endblock %}

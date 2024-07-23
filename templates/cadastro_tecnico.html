@@ -21,4 +21,16 @@
         <button type="submit" class="btn btn-primary">Cadastrar Técnico</button>
     </form>
 </div>
+
+{% if success %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    Swal.fire({
+        title: 'Cadastro concluido!',
+        text: 'Técnico cadastrado com sucesso!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+{% endif %}
 {% endblock %}

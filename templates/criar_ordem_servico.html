@@ -29,9 +29,7 @@
     <div class="form-group">
         <label for="demanda_ids">Demandas:</label>
         <select class="form-control" name="demanda_ids" id="demanda_ids" multiple required>
-            {% for demanda in todas_demandas %}
-            <option value="{{ demanda.id }}">{{ demanda.descricao }}</option>
-            {% endfor %}
+            <!-- This will be populated dynamically -->
         </select>
     </div>
     <div class="form-group">
@@ -40,4 +38,26 @@
     </div>
     <button type="submit" class="btn btn-primary">Confirmar Criação da Ordem de Serviço</button>
 </form>
+
+<script>
+document.getElementById('unidade_id').addEventListener('change', function() {
+    var unidadeId = this.value;
+    var demandaSelect = document.getElementById('demanda_ids');
+
+    demandaSelect.innerHTML = '';
+
+    if (unidadeId) {
+        fetch('/get_demandas/' + unidadeId)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(demanda => {
+                    var option = document.createElement('option');
+                    option.value = demanda.id;
+                    option.text = demanda.descricao;
+                    demandaSelect.appendChild(option);
+                });
+            });
+    }
+});
+</script>
 {% endblock %}

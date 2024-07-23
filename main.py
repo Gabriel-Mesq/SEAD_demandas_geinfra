@@ -19,6 +19,78 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/cadastro_demanda_form', methods=['GET', 'POST'])
+def cadastro_demanda_form():
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+    if request.method == 'POST':
+        unidade_id = request.form.get('unidade_id')
+        tipo_servico_id = request.form.get('tipo_servico_id')
+        descricao = request.form.get('descricao')
+        status_id = request.form.get('status_id')
+        data = request.form.get('data')
+
+        app.logger.info(f'unidade_id: {unidade_id}')
+        app.logger.info(f'tipo_servico_id: {tipo_servico_id}')
+        app.logger.info(f'descricao: {descricao}')
+        app.logger.info(f'status_id: {status_id}')
+        app.logger.info(f'data: {data}')
+
+        if not unidade_id or not tipo_servico_id or not descricao or not status_id or not data:
+            cursor.close()
+            conn.close()
+            return "Erro: Todos os campos são obrigatórios.", 400
+
+        cursor.execute('''
+            INSERT INTO demandas (unidade_id, tipo_servico_id, descricao, status_id, data) 
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (unidade_id, tipo_servico_id, descricao, status_id, data))
+        
+        conn.commit()
+
+        cursor.execute('SELECT id, nome FROM unidades')
+        unidades = cursor.fetchall()
+
+        cursor.execute('SELECT id, descricao FROM tiposservico')
+        tipos_servico = cursor.fetchall()
+
+        cursor.execute('SELECT id, descricao FROM status')
+        status = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return render_template('cadastro_demanda.html', success=True, unidades=unidades, tipos_servico=tipos_servico, status=status)
+
+    cursor.execute('SELECT id, nome FROM unidades')
+    unidades = cursor.fetchall()
+
+    cursor.execute('SELECT id, descricao FROM tiposservico')
+    tipos_servico = cursor.fetchall()
+
+    cursor.execute('SELECT id, descricao FROM status')
+    status = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('cadastro_demanda.html', unidades=unidades, tipos_servico=tipos_servico, status=status)
+
+@app.route('/deletar_demanda/<int:id>', methods=['POST'])
+def deletar_demanda(id):
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+    cursor.execute('DELETE FROM demandas WHERE id = %s', (id,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return '', 204 
+
+
 @app.route('/consultar_demandas', methods=['GET', 'POST'])
 def consultar_demandas():
     conn = get_db_connection()
@@ -34,7 +106,7 @@ def consultar_demandas():
     status = cursor.fetchall()
 
     query = '''
-    SELECT d.id, u.nome as unidade_nome, u.id as unidade_id, ts.descricao as tipo_servico, d.descricao, s.descricao as status, d.data 
+    SELECT d.id, u.nome as unidade_nome, u.id as unidade_id, ts.descricao as tipo_servico, d.descricao, s.id as status_id, s.descricao as status, d.data 
     FROM demandas d 
     JOIN unidades u ON d.unidade_id = u.id 
     JOIN tiposservico ts ON d.tipo_servico_id = ts.id 
@@ -79,11 +151,20 @@ def consultar_demandas():
 
     return render_template('consultar_demandas.html', unidades=unidades, tipos_servico=tipos_servico, status=status, demandas=demandas)
 
+@app.route('/atualizar_status_demanda/<int:id>', methods=['POST'])
+def atualizar_status_demanda(id):
+    status_id = request.form.get('status_id')
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
 
+    cursor.execute('UPDATE demandas SET status_id = %s WHERE id = %s', (status_id, id))
+    conn.commit()
 
+    cursor.close()
+    conn.close()
 
-
-
+    return '', 204  
 
 @app.route('/criar_ordem_servico', methods=['GET', 'POST'])
 def criar_ordem_servico():
@@ -97,18 +178,15 @@ def criar_ordem_servico():
         tecnicos_ids = request.form.getlist('tecnicos')
         observacoes = request.form.get('observacoes')
 
-        # Logs para depuração
         app.logger.info(f'unidade_id: {unidade_id}')
         app.logger.info(f'demanda_ids: {demanda_ids}')
         app.logger.info(f'tecnicos_ids: {tecnicos_ids}')
         app.logger.info(f'data_previsao: {data_previsao}')
         app.logger.info(f'observacoes: {observacoes}')
 
-        # Verificação se unidade_id está None
         if not unidade_id or not demanda_ids:
             return "Erro: Unidade ou Demanda(s) não especificada(s).", 400
 
-        # Insere a nova ordem de serviço no banco de dados
         cursor.execute('INSERT INTO ordem_servico (unidade_id, data_previsao, observacoes) VALUES (%s, %s, %s)',
                        (unidade_id, data_previsao, observacoes))
         ordem_servico_id = cursor.lastrowid
@@ -120,7 +198,6 @@ def criar_ordem_servico():
         for tecnico_id in tecnicos_ids:
             cursor.execute('INSERT INTO ordem_servico_tecnicos (ordem_servico_id, tecnico_id) VALUES (%s, %s)',
                            (ordem_servico_id, tecnico_id))
-
         conn.commit()
         cursor.close()
         conn.close()
@@ -141,8 +218,18 @@ def criar_ordem_servico():
 
     return render_template('criar_ordem_servico.html', unidades=unidades, todas_demandas=todas_demandas, tecnicos=tecnicos)
 
-
-
+@app.route('/get_demandas/<int:unidade_id>', methods=['GET'])
+def get_demandas(unidade_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    cursor.execute('SELECT id, descricao FROM demandas WHERE unidade_id = %s', (unidade_id,))
+    demandas = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+    
+    return jsonify(demandas)
 
 @app.route('/ver_ordem_servico/<int:ordem_servico_id>', methods=['GET'])
 def ver_ordem_servico(ordem_servico_id):
@@ -176,8 +263,6 @@ def ver_ordem_servico(ordem_servico_id):
     conn.close()
 
     return render_template('ver_ordem_servico.html', ordem_servico=ordem_servico, unidade=unidade, demandas=demandas, tecnicos=tecnicos)
-
-
 
 @app.route('/gerar_pdf/<int:ordem_servico_id>')
 def gerar_pdf(ordem_servico_id):
@@ -233,7 +318,6 @@ def gerar_pdf(ordem_servico_id):
         logging.error(f"Erro na geração do PDF para a ordem de serviço com ID {ordem_servico_id}: {str(e)}")
         return f"Erro ao gerar o PDF: {str(e)}", 500
 
-
 @app.route('/cadastro_tecnico')
 def cadastro_tecnico():
     return render_template('cadastro_tecnico.html')
@@ -274,8 +358,7 @@ def cadastro_tecnico_form():
 
 @app.route('/cadastro_tecnico_success')
 def cadastro_tecnico_success():
-    return "Técnico cadastrado com sucesso!"
-
+    return render_template('cadastro_tecnico.html', success=True)
 
 @app.route('/consultar_ordens_servico', methods=['GET', 'POST'])
 def consultar_ordens_servico():

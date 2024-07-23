@@ -1,12 +1,14 @@
 {% for demanda in demandas %}
 <tr>
-    <td><input type="checkbox" name="demanda_ids" value="{{ demanda.id }}"></td>
     <td>{{ demanda.id }}</td>
     <td>{{ demanda.unidade_nome }}</td>
     <td>{{ demanda.tipo_servico }}</td>
     <td>{{ demanda.descricao }}</td>
     <td>{{ demanda.status }}</td>
     <td>{{ demanda.data }}</td>
+    <td>
+        <button class="btn btn-danger btn-sm delete-button" data-id="{{ demanda.id }}">Excluir</button>
+    </td>
     <input type="hidden" name="unidade_id" value="{{ demanda.unidade_id }}">
 </tr>
 {% endfor %}

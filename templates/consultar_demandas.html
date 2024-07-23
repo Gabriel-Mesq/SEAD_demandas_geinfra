@@ -1,89 +1,145 @@
 {% extends "header.html" %}
 
-{% block title %}Consultar Ordens de Serviço{% endblock %}
+{% block title %}Consultar Demandas{% endblock %}
 
 {% block content %}
-        <h1>Consultar Demandas</h1>
-        <form id="filterForm" class="p-3">
-            <div>
-                <label for="id_filter">ID:</label>
-                <input type="text" name="id_filter" id="id_filter">
-            </div>
-            <div>
-                <label for="unidade_filter">Unidade:</label>
-                <select name="unidade_filter" id="unidade_filter">
-                    <option value="">Todas</option>
-                    {% for unidade in unidades %}
-                    <option value="{{ unidade.id }}">{{ unidade.nome }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label for="tipo_servico_filter">Tipo de Serviço:</label>
-                <select name="tipo_servico_filter" id="tipo_servico_filter">
-                    <option value="">Todos</option>
-                    {% for tipo_servico in tipos_servico %}
-                    <option value="{{ tipo_servico.id }}">{{ tipo_servico.descricao }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label for="status_filter">Status:</label>
-                <select name="status_filter" id="status_filter">
-                    <option value="">Todos</option>
-                    {% for stat in status %}
-                    <option value="{{ stat.id }}">{{ stat.descricao }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label for="data_filter">Data:</label>
-                <input type="date" name="data_filter" id="data_filter">
-            </div>
-        </form>
-        <form method="post" action="{{ url_for('consultar_demandas') }}">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Unidade</th>
-                        <th>Tipo de Serviço</th>
-                        <th>Descrição</th>
-                        <th>Status</th>
-                        <th>Data</th>
-                    </tr>
-                </thead>
-                <tbody id="demandasTableBody">
-                    {% for demanda in demandas %}
-                    <tr>
-                        <td>{{ demanda.id }}</td>
-                        <td>{{ demanda.unidade_nome }}</td>
-                        <td>{{ demanda.tipo_servico }}</td>
-                        <td>{{ demanda.descricao }}</td>
-                        <td>{{ demanda.status }}</td>
-                        <td>{{ demanda.data }}</td>
-                        <input type="hidden" name="unidade_id" value="{{ demanda.unidade_id }}">
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% if mensagem %}
-            <p>{{ mensagem }}</p>
-            {% endif %}
-        </form>
+<h1>Consultar Demandas</h1>
+<form id="filterForm" class="p-3">
+    <div class="mb-3">
+        <label for="id_filter" class="form-label">ID:</label>
+        <input type="text" name="id_filter" id="id_filter" class="form-control-sm">
+    </div>
+    <div class="mb-3">
+        <label for="unidade_filter" class="form-label">Unidade:</label>
+        <select name="unidade_filter" id="unidade_filter" class="form-control-sm">
+            <option value="">Todas</option>
+            {% for unidade in unidades %}
+            <option value="{{ unidade.id }}">{{ unidade.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="tipo_servico_filter" class="form-label">Tipo de Serviço:</label>
+        <select name="tipo_servico_filter" id="tipo_servico_filter" class="form-control-sm">
+            <option value="">Todos</option>
+            {% for tipo_servico in tipos_servico %}
+            <option value="{{ tipo_servico.id }}">{{ tipo_servico.descricao }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="status_filter" class="form-label">Status:</label>
+        <select name="status_filter" id="status_filter" class="form-control-sm">
+            <option value="">Todos</option>
+            {% for stat in status %}
+            <option value="{{ stat.id }}">{{ stat.descricao }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="data_filter" class="form-label">Data:</label>
+        <input type="date" name="data_filter" id="data_filter" class="form-control-sm">
+    </div>
+</form>
 
-    <script>
-        $(document).ready(function(){
-            $('#filterForm input, #filterForm select').on('change', function(){
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Unidade</th>
+            <th>Tipo de Serviço</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="demandasTableBody">
+        {% for demanda in demandas %}
+        <tr data-id="{{ demanda.id }}">
+            <td>{{ demanda.id }}</td>
+            <td>{{ demanda.unidade_nome }}</td>
+            <td>{{ demanda.tipo_servico }}</td>
+            <td>{{ demanda.descricao }}</td>
+            <td>
+                <select class="form-select status-select" data-id="{{ demanda.id }}">
+                    {% for stat in status %}
+                    <option value="{{ stat.id }}" {% if stat.descricao == demanda.status %}selected{% endif %}>
+                        {{ stat.descricao }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>{{ demanda.data }}</td>
+            <td>
+                <button class="btn btn-danger btn-sm delete-button" data-id="{{ demanda.id }}">Excluir</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(document).ready(function(){
+    $('#filterForm input, #filterForm select').on('change', function(){
+        $.ajax({
+            url: '{{ url_for("consultar_demandas") }}',
+            method: 'POST',
+            data: $('#filterForm').serialize(),
+            success: function(response){
+                $('#demandasTableBody').html(response);
+            }
+        });
+    });
+
+    $(document).on('click', '.delete-button', function(){
+        var demandaId = $(this).data('id');
+        Swal.fire({
+            title: 'Tem certeza?',
+            text: "Você não poderá reverter isso!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, exclua!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
                 $.ajax({
-                    url: '/consultar_demandas',
+                    url: '/deletar_demanda/' + demandaId,
                     method: 'POST',
-                    data: $('#filterForm').serialize(),
-                    success: function(response){
-                        $('#demandasTableBody').html(response);
+                    success: function(response) {
+                        Swal.fire(
+                            'Excluído!',
+                            'A demanda foi excluída.',
+                            'success'
+                        )
+                        // Remove the corresponding row from the table
+                        $('tr[data-id="' + demandaId + '"]').remove();
                     }
                 });
-            });
+            }
+        })
+    });
+
+    $(document).on('change', '.status-select', function(){
+        var demandaId = $(this).data('id');
+        var statusId = $(this).val();
+        $.ajax({
+            url: '/atualizar_status_demanda/' + demandaId,
+            method: 'POST',
+            data: { status_id: statusId },
+            success: function(response) {
+                Swal.fire(
+                    'Atualizado!',
+                    'O status da demanda foi atualizado.',
+                    'success'
+                )
+            }
         });
-    </script>
+    });
+});
+</script>
 {% endblock %}
