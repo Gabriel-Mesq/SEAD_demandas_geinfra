@@ -10,6 +10,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        integrity="sha512-xw+avvttGAvCWW6ENxdx/zM5sZXRUZS5Sv0Vrlj8F9wvhj9Y4RxUegw1KSLv4bgzNv+XbKJ3f9ZMEW0wO8Q3oA=="
+        crossorigin="anonymous" />
 </head>
 <body>
     <!-- Header -->
@@ -39,12 +43,31 @@
                 </ul>
             </div>
         </nav>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-warning p-1">
+            <div>
+                <ul class="navbar-nav">
+    
+                </ul>
+            </div>
+        </nav>
+            
     </header>
 
     <div class="container mt-5">
         {% block content %}
         {% endblock %}
     </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024. Todos os direitos reservados.</p>
+            <div class="contact-links">
+                <a href="https://github.com/Gabriel-Mesq" target="_blank"><i class="fab fa-github"></i></a>
+                <a href="mailto:devgabrielmesquita@gmail.com"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

@@ -1,23 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Índice de Rotas</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
-</head>
+{% extends "header.html" %}
 
-<body>
-    {% include 'header.html' %}
+{% block title %}Consultar Ordens de Serviço{% endblock %}
 
-    <div class="container">
-        <h1>Índice de Rotas</h1>
-        </br>
-        <ul>
-            <li><a href="{{ url_for('consultar_demandas') }}">Consultar Demandas</a></li>
-            <li><a href="{{ url_for('consultar_ordens_servico') }}">Consultar Ordens de Serviço</a></li>
-            <li><a href="{{ url_for('criar_ordem_servico') }}">Criar Ordem de Serviço</a></li>
-            <li><a href="{{ url_for('cadastro_tecnico') }}">Cadastro de Técnico</a></li>
-        </ul>
+{% block content %}
+    <div class="container my-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="card-title text-center">Índice de Rotas</h1>
+                <ul class="list-group list-group-flush mt-4">
+                    <li class="list-group-item text-center">
+                        <a href="{{ url_for('consultar_demandas') }}" class="btn btn-link">Consultar Demandas</a>
+                    </li>
+                    <li class="list-group-item text-center">
+                        <a href="{{ url_for('consultar_ordens_servico') }}" class="btn btn-link">Consultar Ordens de Serviço</a>
+                    </li>
+                    <li class="list-group-item text-center">
+                        <a href="{{ url_for('criar_ordem_servico') }}" class="btn btn-link">Criar Ordem de Serviço</a>
+                    </li>
+                    <li class="list-group-item text-center">
+                        <a href="{{ url_for('cadastro_tecnico') }}" class="btn btn-link">Cadastro de Técnico</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    color: #333333;
+}
+
+a {
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+a:hover {
+    background-color: #007BFF;
+    color: #ffffff;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+}
+</style>   
+{% endblock %}
