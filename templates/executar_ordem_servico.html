@@ -1,0 +1,93 @@
+{% extends "header.html" %}
+
+{% block title %}Executar Ordem de Serviço{% endblock %}
+
+{% block content %}
+<h1>Executar Ordem de Serviço</h1>
+<form id="ordemServicoForm">
+    <div class="form-group">
+        <label for="ordem_servico_id">ID da Ordem de Serviço:</label>
+        <input type="text" class="form-control" id="ordem_servico_id" name="ordem_servico_id" value="{{ ordem_servico.ordem_servico_id }}" readonly>
+    </div>
+    <div class="form-group">
+        <label for="unidade_nome">Unidade:</label>
+        <input type="text" class="form-control" id="unidade_nome" name="unidade_nome" value="{{ ordem_servico.unidade_nome }}" readonly>
+    </div>
+    <div class="form-group">
+        <label for="data_criacao">Data de Criação:</label>
+        <input type="date" class="form-control" id="data_criacao" name="data_criacao" value="{{ ordem_servico.data_criacao }}" readonly>
+    </div>
+    <div class="form-group">
+        <label for="data_previsao">Data de Previsão:</label>
+        <input type="date" class="form-control" id="data_previsao" name="data_previsao" value="{{ ordem_servico.data_previsao }}" readonly>
+    </div>
+    <div class="form-group">
+        <label for="observacoes">Observações:</label>
+        <textarea class="form-control" id="observacoes" name="observacoes" readonly>{{ ordem_servico.observacoes }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="numero_sei">Número SEI:</label>
+        <input type="text" class="form-control" id="numero_sei" name="numero_sei">
+    </div>
+    <div class="form-group">
+        <label for="data_execucao_servico">Data da Execução do Serviço:</label>
+        <input type="date" class="form-control" id="data_execucao_servico" name="data_execucao_servico">
+    </div>
+    <div class="form-group">
+        <label for="servicos_executados">Serviços Executados:</label>
+        <textarea class="form-control" id="servicos_executados" name="servicos_executados"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="materiais_utilizados">Materiais Utilizados:</label>
+        <textarea class="form-control" id="materiais_utilizados" name="materiais_utilizados"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="demandas">Demandas:</label>
+        <ul id="demandas">
+            {% for demanda in demandas %}
+            <li>
+                <input type="checkbox" id="demanda_{{ demanda.id }}" name="demandas" value="{{ demanda.id }}">
+                <label for="demanda_{{ demanda.id }}">{{ demanda.descricao }} ({{ demanda.tipo_servico }})</label>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="form-group">
+        <label for="tecnicos">Técnicos Responsáveis:</label>
+        <ul id="tecnicos">
+            {% for tecnico in tecnicos %}
+            <li>{{ tecnico.nome }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <button type="button" id="gerarPdfButton" class="btn btn-secondary">Executar</button>
+</form>
+
+<script>
+    document.getElementById('gerarPdfButton').addEventListener('click', function() {
+        const ordemServicoId = document.getElementById('ordem_servico_id').value;
+        const numeroSei = document.getElementById('numero_sei').value;
+        const dataExecucaoServico = document.getElementById('data_execucao_servico').value;
+        const servicosExecutados = document.getElementById('servicos_executados').value;
+        const materiaisUtilizados = document.getElementById('materiais_utilizados').value;
+
+        const selectedDemandas = Array.from(document.querySelectorAll('input[name="demandas"]:checked'))
+            .map(checkbox => checkbox.value)
+            .join(',');
+
+        const url = '{{ url_for("gerar_pdf_executar", ordem_servico_id=0) }}'
+            .replace('0', ordemServicoId) +
+            `?numero_sei=${encodeURIComponent(numeroSei)}` +
+            `&data_execucao_servico=${encodeURIComponent(dataExecucaoServico)}` +
+            `&servicos_executados=${encodeURIComponent(servicosExecutados)}` +
+            `&materiais_utilizados=${encodeURIComponent(materiaisUtilizados)}` +
+            `&demandas=${encodeURIComponent(selectedDemandas)}`;
+
+        window.open(url, '_blank');
+    });
+</script>
+
+
+
+
+{% endblock %}

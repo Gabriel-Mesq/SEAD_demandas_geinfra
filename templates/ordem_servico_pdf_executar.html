@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ordem de Serviço #{{ ordem_servico.ordem_servico_id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        h1, h3 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .observacoes {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ordem de Serviço #{{ ordem_servico.ordem_servico_id }}</h1>
+        <p><strong>Unidade:</strong> {{ ordem_servico.unidade_nome }}</p>
+        <p><strong>Data de Criação:</strong> {{ ordem_servico.data_criacao }}</p>
+        <p><strong>Data de Previsão de Atendimento:</strong> {{ ordem_servico.data_previsao }}</p>
+        <p><strong>Número SEI:</strong> {{ numero_sei }}</p>
+        <p><strong>Data da Execução do Serviço:</strong> {{ data_execucao_servico }}</p>
+        <p><strong>Serviços Executados:</strong> {{ servicos_executados }}</p>
+        <p><strong>Materiais Utilizados:</strong> {{ materiais_utilizados }}</p>
+
+        <h3>Técnicos Responsáveis:</h3>
+        <ul>
+            {% for tecnico in tecnicos %}
+                <li>{{ tecnico.nome }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Demandas:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Descrição</th>
+                    <th>Tipo de Serviço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for demanda in demandas %}
+                <tr>
+                    <td>{{ demanda.id }}</td>
+                    <td>{{ demanda.descricao }}</td>
+                    <td>{{ demanda.tipo_servico }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <h3>Observações:</h3>
+        <div class="observacoes">
+            <p>{{ ordem_servico.observacoes }}</p>
+        </div>
+    </div>
+</body>
+</html>

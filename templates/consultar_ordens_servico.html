@@ -3,61 +3,66 @@
 {% block title %}Consultar Ordens de Serviço{% endblock %}
 
 {% block content %}
-<h1>Consultar Ordens de Serviço</h1>
-<form id="filterForm" class="p-3">
-    <div class="form-row mb-3">
-        <div class="form-group col-md-6">
-            <label for="ordem_servico_id_filter">ID da Ordem de Serviço:</label>
-            <input type="text" class="form-control" name="ordem_servico_id_filter" id="ordem_servico_id_filter">
+<div class="container">
+    <h1 class="mt-4">Consultar Ordens de Serviço</h1>
+    <form id="filterForm" class="p-3">
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3">
+                <label for="ordem_servico_id_filter" class="form-label">ID da Ordem de Serviço:</label>
+                <input type="text" class="form-control" name="ordem_servico_id_filter" id="ordem_servico_id_filter">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="unidade_filter" class="form-label">Unidade:</label>
+                <select class="form-control" name="unidade_filter" id="unidade_filter">
+                    <option value="">Todas</option>
+                    {% for unidade in unidades %}
+                    <option value="{{ unidade.id }}">{{ unidade.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
-        <div class="form-group col-md-6">
-            <label for="unidade_filter">Unidade:</label>
-            <select class="form-control" name="unidade_filter" id="unidade_filter">
-                <option value="">Todas</option>
-                {% for unidade in unidades %}
-                <option value="{{ unidade.id }}">{{ unidade.nome }}</option>
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3">
+                <label for="data_criacao_filter" class="form-label">Data de Criação:</label>
+                <input type="date" class="form-control" name="data_criacao_filter" id="data_criacao_filter">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="data_previsao_filter" class="form-label">Data de Previsão:</label>
+                <input type="date" class="form-control" name="data_previsao_filter" id="data_previsao_filter">
+            </div>
+        </div>
+    </form>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Unidade</th>
+                    <th>Data de Criação</th>
+                    <th>Data de Previsão</th>
+                    <th>Observações</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="ordensTableBody">
+                {% for ordem in ordens_servico %}
+                <tr>
+                    <td>{{ ordem.ordem_servico_id }}</td>
+                    <td>{{ ordem.unidade_nome }}</td>
+                    <td>{{ ordem.data_criacao }}</td>
+                    <td>{{ ordem.data_previsao }}</td>
+                    <td>{{ ordem.observacoes }}</td>
+                    <td class="text-center">
+                        <button class="btn btn-primary btn-sm button-visualizar" data-id="{{ ordem.ordem_servico_id }}">Editar</button>
+                        <a href="{{ url_for('gerar_pdf', ordem_servico_id=ordem.ordem_servico_id) }}" class="btn btn-secondary btn-sm">Download PDF</a>
+                        <a href="{{ url_for('executar_ordem_servico', ordem_servico_id=ordem.ordem_servico_id) }}" class="btn btn-success btn-sm">Executar</a>
+                    </td>
+                </tr>
                 {% endfor %}
-            </select>
-        </div>
+            </tbody>
+        </table>
     </div>
-    <div class="form-row mb-3">
-        <div class="form-group col-md-6">
-            <label for="data_criacao_filter">Data de Criação:</label>
-            <input type="date" class="form-control" name="data_criacao_filter" id="data_criacao_filter">
-        </div>
-        <div class="form-group col-md-6">
-            <label for="data_previsao_filter">Data de Previsão:</label>
-            <input type="date" class="form-control" name="data_previsao_filter" id="data_previsao_filter">
-        </div>
-    </div>
-</form>
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Unidade</th>
-            <th>Data de Criação</th>
-            <th>Data de Previsão</th>
-            <th>Observações</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody id="ordensTableBody">
-        {% for ordem in ordens_servico %}
-        <tr>
-            <td>{{ ordem.ordem_servico_id }}</td>
-            <td>{{ ordem.unidade_nome }}</td>
-            <td>{{ ordem.data_criacao }}</td>
-            <td>{{ ordem.data_previsao }}</td>
-            <td>{{ ordem.observacoes }}</td>
-            <td style="text-align: center;">
-                <button class="btn btn-primary button-visualizar" data-id="{{ ordem.ordem_servico_id }}">Editar</button>
-                <a href="{{ url_for('gerar_pdf', ordem_servico_id=ordem.ordem_servico_id) }}" class="btn btn-secondary">Download PDF</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="ordemServicoModal" tabindex="-1" role="dialog" aria-labelledby="ordemServicoModalLabel" aria-hidden="true">

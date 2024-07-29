@@ -39,6 +39,17 @@
     <button type="submit" class="btn btn-primary">Confirmar Criação da Ordem de Serviço</button>
 </form>
 
+{% if success %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    Swal.fire({
+        title: 'Cadastro concluido!',
+        text: 'Técnico cadastrado com sucesso!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+{% endif %}
 <script>
 document.getElementById('unidade_id').addEventListener('change', function() {
     var unidadeId = this.value;

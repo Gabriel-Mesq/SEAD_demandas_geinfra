@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response, jsonify
 import pdfkit
 import pymysql
+import cryptography
 import logging
 
 app = Flask(__name__)
@@ -171,6 +172,16 @@ def criar_ordem_servico():
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
 
+    # Fetch unidades, todas_demandas, and tecnicos before the request handling
+    cursor.execute('SELECT id, nome FROM unidades')
+    unidades = cursor.fetchall()
+
+    cursor.execute('SELECT id, descricao FROM demandas')
+    todas_demandas = cursor.fetchall()
+
+    cursor.execute('SELECT id, nome FROM tecnico')
+    tecnicos = cursor.fetchall()
+
     if request.method == 'POST':
         unidade_id = request.form.get('unidade_id')
         demanda_ids = request.form.getlist('demanda_ids')
@@ -201,22 +212,14 @@ def criar_ordem_servico():
         conn.commit()
         cursor.close()
         conn.close()
-
-        return redirect(url_for('ver_ordem_servico', ordem_servico_id=ordem_servico_id))
-
-    cursor.execute('SELECT id, nome FROM unidades')
-    unidades = cursor.fetchall()
-
-    cursor.execute('SELECT id, descricao FROM demandas')
-    todas_demandas = cursor.fetchall()
-
-    cursor.execute('SELECT id, nome FROM tecnico')
-    tecnicos = cursor.fetchall()
+        return render_template('criar_ordem_servico.html', success=True, unidades=unidades, todas_demandas=todas_demandas, tecnicos=tecnicos)
 
     cursor.close()
     conn.close()
 
     return render_template('criar_ordem_servico.html', unidades=unidades, todas_demandas=todas_demandas, tecnicos=tecnicos)
+
+
 
 @app.route('/get_demandas/<int:unidade_id>', methods=['GET'])
 def get_demandas(unidade_id):
@@ -318,6 +321,84 @@ def gerar_pdf(ordem_servico_id):
         logging.error(f"Erro na geração do PDF para a ordem de serviço com ID {ordem_servico_id}: {str(e)}")
         return f"Erro ao gerar o PDF: {str(e)}", 500
 
+@app.route('/gerar_pdf_executar/<int:ordem_servico_id>', methods=['GET'])
+def gerar_pdf_executar(ordem_servico_id):
+    try:
+        # Get additional information from the request
+        numero_sei = request.args.get('numero_sei')
+        data_execucao_servico = request.args.get('data_execucao_servico')
+        servicos_executados = request.args.get('servicos_executados')
+        materiais_utilizados = request.args.get('materiais_utilizados')
+        selected_demandas = request.args.get('demandas').split(',')
+
+        conn = get_db_connection()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+        cursor.execute('''
+        SELECT os.id as ordem_servico_id, u.nome as unidade_nome, os.data_criacao, os.data_previsao, os.observacoes
+        FROM ordem_servico os 
+        JOIN unidades u ON os.unidade_id = u.id 
+        WHERE os.id = %s
+        ''', (ordem_servico_id,))
+        ordem_servico = cursor.fetchone()
+
+        if not ordem_servico:
+            logging.error(f"Ordem de serviço com ID {ordem_servico_id} não encontrada.")
+            return "Ordem de serviço não encontrada", 404
+
+        # Filter demandas based on selected IDs
+        cursor.execute('''
+        SELECT d.id, d.descricao, ts.descricao as tipo_servico 
+        FROM ordem_servico_demandas osd 
+        JOIN demandas d ON osd.demanda_id = d.id 
+        JOIN tiposservico ts ON d.tipo_servico_id = ts.id 
+        WHERE osd.ordem_servico_id = %s AND d.id IN (%s)
+        ''' % (ordem_servico_id, ','.join(['%s'] * len(selected_demandas))),
+        tuple(selected_demandas))
+        demandas = cursor.fetchall()
+
+        cursor.execute('''
+        SELECT t.nome
+        FROM ordem_servico_tecnicos ost
+        JOIN tecnico t ON ost.tecnico_id = t.id
+        WHERE ost.ordem_servico_id = %s
+        ''', (ordem_servico_id,))
+        tecnicos = cursor.fetchall()
+
+        # Update the status of the selected demandas to "Atendido"
+        for demanda_id in selected_demandas:
+            cursor.execute('''
+            UPDATE demandas SET status_id = (SELECT id FROM status WHERE descricao = 'Atendido') 
+            WHERE id = %s
+            ''', (demanda_id,))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        rendered = render_template('ordem_servico_pdf_executar.html',
+                                   ordem_servico=ordem_servico,
+                                   demandas=demandas,
+                                   tecnicos=tecnicos,
+                                   numero_sei=numero_sei,
+                                   data_execucao_servico=data_execucao_servico,
+                                   servicos_executados=servicos_executados,
+                                   materiais_utilizados=materiais_utilizados)
+        pdf = pdfkit.from_string(rendered, False, configuration=config)
+
+        if not pdf:
+            logging.error(f"Falha na geração do PDF para a ordem de serviço com ID {ordem_servico_id}.")
+            return "Erro ao gerar o PDF", 500
+
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=ordem_servico_{ordem_servico_id}.pdf'
+
+        return response
+    except Exception as e:
+        logging.error(f"Erro na geração do PDF para a ordem de serviço com ID {ordem_servico_id}: {str(e)}")
+        return f"Erro ao gerar o PDF: {str(e)}", 500
+
 @app.route('/cadastro_tecnico')
 def cadastro_tecnico():
     return render_template('cadastro_tecnico.html')
@@ -359,6 +440,45 @@ def cadastro_tecnico_form():
 @app.route('/cadastro_tecnico_success')
 def cadastro_tecnico_success():
     return render_template('cadastro_tecnico.html', success=True)
+
+@app.route('/executar_ordem_servico/<int:ordem_servico_id>')
+def executar_ordem_servico(ordem_servico_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    cursor.execute('''
+    SELECT os.id as ordem_servico_id, u.nome as unidade_nome, os.data_criacao, os.data_previsao, os.observacoes
+    FROM ordem_servico os 
+    JOIN unidades u ON os.unidade_id = u.id
+    WHERE os.id = %s
+    ''', (ordem_servico_id,))
+    ordem_servico = cursor.fetchone()
+
+    cursor.execute('''
+    SELECT d.id, d.descricao, ts.descricao as tipo_servico 
+    FROM ordem_servico_demandas osd
+    JOIN demandas d ON osd.demanda_id = d.id
+    JOIN tiposservico ts ON d.tipo_servico_id = ts.id
+    WHERE osd.ordem_servico_id = %s
+    ''', (ordem_servico_id,))
+    demandas = cursor.fetchall()
+
+    cursor.execute('''
+    SELECT t.id, t.nome
+    FROM ordem_servico_tecnicos ost
+    JOIN tecnico t ON ost.tecnico_id = t.id
+    WHERE ost.ordem_servico_id = %s
+    ''', (ordem_servico_id,))
+    tecnicos = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    
+    if not ordem_servico:
+        return 'Ordem de Serviço não encontrada', 404
+    
+    return render_template('executar_ordem_servico.html', ordem_servico=ordem_servico, demandas=demandas, tecnicos=tecnicos)
+
 
 @app.route('/consultar_ordens_servico', methods=['GET', 'POST'])
 def consultar_ordens_servico():
