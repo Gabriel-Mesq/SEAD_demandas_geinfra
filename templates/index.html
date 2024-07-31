@@ -14,7 +14,7 @@
                     </li>
                     <!-- Cadastrar Demandas -->
                     <li class="list-group-item text-center">
-                        <a href="{{ url_for('cadastro_tecnico') }}" class="btn btn-link">Cadastrar Demandas</a>
+                        <a href="{{ url_for('cadastro_demanda_form') }}" class="btn btn-link">Cadastrar Demandas</a>
                     </li>
                     <li class="list-group-item text-center">
                         <a href="{{ url_for('consultar_ordens_servico') }}" class="btn btn-link">Consultar Ordens de Serviço</a>
@@ -23,10 +23,11 @@
                         <a href="{{ url_for('criar_ordem_servico') }}" class="btn btn-link">Criar Ordem de Serviço</a>
                     </li>
                     <li class="list-group-item text-center">
-                        <a href="{{ url_for('cadastro_tecnico') }}" class="btn btn-link">Cadastro de Técnico</a>
+                        <a href="{{ url_for('tecnico.cadastro_tecnico') }}" class="btn btn-link">Cadastro de Técnico</a>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
+
 {% endblock %}

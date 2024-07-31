@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, make_respo
 import pdfkit
 import pymysql
 import logging
+from routes import register_blueprints
 
 app = Flask(__name__)
 
@@ -13,6 +14,7 @@ config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 def get_db_connection():
     return pymysql.connect(user='root', password='melhor1@', host='127.0.0.1', database='demandas_geinfra_dev')
 
+register_blueprints(app)
 
 @app.route('/')
 def index():
@@ -398,48 +400,6 @@ def gerar_pdf_executar(ordem_servico_id):
     except Exception as e:
         logging.error(f"Erro na geração do PDF para a ordem de serviço com ID {ordem_servico_id}: {str(e)}")
         return f"Erro ao gerar o PDF: {str(e)}", 500
-
-@app.route('/cadastro_tecnico')
-def cadastro_tecnico():
-    return render_template('cadastro_tecnico.html')
-
-@app.route('/cadastro_tecnico_form', methods=['GET', 'POST'])
-def cadastro_tecnico_form():
-    conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
-
-    if request.method == 'POST':
-        nome = request.form.get('nome')
-        especialidade = request.form.get('especialidade')
-        contato = request.form.get('contato')
-
-        # Logs for debugging
-        app.logger.info(f'nome: {nome}')
-        app.logger.info(f'especialidade: {especialidade}')
-        app.logger.info(f'contato: {contato}')
-
-        # Check if any required field is missing
-        if not nome or not especialidade or not contato:
-            return "Erro: Todos os campos são obrigatórios.", 400
-
-        # Insert the new technician into the database
-        cursor.execute('INSERT INTO tecnico (nome) VALUES (%s)',
-                       (nome))
-        
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        return redirect(url_for('cadastro_tecnico_success'))
-
-    cursor.close()
-    conn.close()
-
-    return render_template('cadastro_tecnico.html')
-
-@app.route('/cadastro_tecnico_success')
-def cadastro_tecnico_success():
-    return render_template('cadastro_tecnico.html', success=True)
 
 @app.route('/executar_ordem_servico/<int:ordem_servico_id>')
 def executar_ordem_servico(ordem_servico_id):
