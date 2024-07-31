@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response, jsonify
 import pdfkit
 import pymysql
-import cryptography
 import logging
 
 app = Flask(__name__)
@@ -83,6 +82,7 @@ def deletar_demanda(id):
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
 
+    cursor.execute('DELETE FROM ordem_servico_demandas WHERE demanda_id = %s', (id,))
     cursor.execute('DELETE FROM demandas WHERE id = %s', (id,))
     conn.commit()
 
