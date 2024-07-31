@@ -15,17 +15,6 @@ def cadastro_tecnico_form():
 
     if request.method == 'POST':
         nome = request.form.get('nome')
-        especialidade = request.form.get('especialidade')
-        contato = request.form.get('contato')
-
-        # Logs for debugging
-        app.logger.info(f'nome: {nome}')
-        app.logger.info(f'especialidade: {especialidade}')
-        app.logger.info(f'contato: {contato}')
-
-        # Check if any required field is missing
-        if not nome or not especialidade or not contato:
-            return "Erro: Todos os campos são obrigatórios.", 400
 
         # Insert the new technician into the database
         cursor.execute('INSERT INTO tecnico (nome) VALUES (%s)',
@@ -35,7 +24,7 @@ def cadastro_tecnico_form():
         cursor.close()
         conn.close()
 
-        return redirect(url_for('tecnico.cadastro_tecnico_success'))  # Use o nome completo do endpoint
+        return redirect(url_for('tecnico.cadastro_tecnico_success'))
 
     cursor.close()
     conn.close()
