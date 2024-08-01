@@ -12,7 +12,7 @@ config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 
 
 def get_db_connection():
-    return pymysql.connect(user='root', password='melhor1@', host='127.0.0.1', database='demandas_geinfra_dev')
+    return pymysql.connect(user='root', password='melhor1@', host='127.0.0.1', database='demandas_geinfra_prod')
 
 register_blueprints(app)
 
@@ -492,6 +492,38 @@ def consultar_ordens_servico():
 
     return render_template('consultar_ordens_servico.html', ordens_servico=ordens_servico, unidades=unidades)
 
+@app.route('/deletar_ordem_servico/<int:id>', methods=['POST'])
+def deletar_ordem_servico(id):
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+    try:
+        # Delete dependent records in ordem_servico_tecnicos first
+        cursor.execute('DELETE FROM ordem_servico_tecnicos WHERE ordem_servico_id = %s', (id,))
+        
+        # Delete dependent records in ordem_servico_demandas
+        cursor.execute('DELETE FROM ordem_servico_demandas WHERE ordem_servico_id = %s', (id,))
+        
+        # Now delete the ordem_servico
+        cursor.execute('DELETE FROM ordem_servico WHERE id = %s', (id,))
+        
+        conn.commit()
+    except pymysql.err.IntegrityError as ie:
+        conn.rollback()
+        print(f"Integrity error: {str(ie)}")
+        return jsonify({'error': 'Integrity error: ' + str(ie)}), 500
+    except Exception as e:
+        conn.rollback()
+        print(f"General error: {str(e)}")
+        return jsonify({'error': 'General error: ' + str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+    return '', 204
+
+
+
 @app.route('/ordem_servico/<int:id>', methods=['GET'])
 def visualizar_ordem_servico(id):
     conn = get_db_connection()
@@ -543,5 +575,5 @@ def atualizar_ordem_servico():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+    app.run(debug=True, port=8080)
 

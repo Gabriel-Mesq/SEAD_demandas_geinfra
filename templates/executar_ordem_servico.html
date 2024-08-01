@@ -27,26 +27,26 @@
     </div>
     <div class="form-group">
         <label for="numero_sei">Número SEI:</label>
-        <input type="text" class="form-control" id="numero_sei" name="numero_sei">
+        <input type="text" class="form-control" id="numero_sei" name="numero_sei" required>
     </div>
     <div class="form-group">
         <label for="data_execucao_servico">Data da Execução do Serviço:</label>
-        <input type="date" class="form-control" id="data_execucao_servico" name="data_execucao_servico">
+        <input type="date" class="form-control" id="data_execucao_servico" name="data_execucao_servico" required>
     </div>
     <div class="form-group">
         <label for="servicos_executados">Serviços Executados:</label>
-        <textarea class="form-control" id="servicos_executados" name="servicos_executados"></textarea>
+        <textarea class="form-control" id="servicos_executados" name="servicos_executados" required></textarea>
     </div>
     <div class="form-group">
         <label for="materiais_utilizados">Materiais Utilizados:</label>
-        <textarea class="form-control" id="materiais_utilizados" name="materiais_utilizados"></textarea>
+        <textarea class="form-control" id="materiais_utilizados" name="materiais_utilizados" required></textarea>
     </div>
     <div class="form-group">
         <label for="demandas">Demandas:</label>
         <ul id="demandas">
             {% for demanda in demandas %}
             <li>
-                <input type="checkbox" id="demanda_{{ demanda.id }}" name="demandas" value="{{ demanda.id }}">
+                <input type="checkbox" id="demanda_{{ demanda.id }}" name="demandas" value="{{ demanda.id }}" required>
                 <label for="demanda_{{ demanda.id }}">{{ demanda.descricao }} ({{ demanda.tipo_servico }})</label>
             </li>
             {% endfor %}
