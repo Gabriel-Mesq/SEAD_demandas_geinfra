@@ -76,12 +76,13 @@
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        new Choices('#tecnicos', {
+        var tecnicoChoices = new Choices('#tecnicos', {
             removeItemButton: true,
             placeholderValue: 'Selecione um técnico',
             noResultsText: 'Nenhum resultado encontrado',
             itemSelectText: 'Pressione para selecionar'
         });
+
         document.getElementById('unidade_id').addEventListener('change', function () {
             var unidadeId = this.value;
             var demandaSelect = document.getElementById('demanda_ids');
@@ -101,6 +102,7 @@
                     });
             }
         });
+
         document.getElementById('tecnicoForm').addEventListener('submit', function (event) {
             event.preventDefault();
             var formData = new FormData(this);
@@ -111,11 +113,11 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        var tecnicoSelect = document.getElementById('tecnicos');
-                        var option = document.createElement('option');
-                        option.value = data.tecnico_id;
-                        option.text = data.nome;
-                        tecnicoSelect.appendChild(option);
+                        tecnicoChoices.setChoices([{
+                            value: data.tecnico_id,
+                            label: data.nome,
+                            selected: true
+                        }], 'value', 'label', true);
 
                         $('#addTecnicoModal').modal('hide').on('hidden.bs.modal', function (e) {
                             $('body').removeClass('modal-open');
