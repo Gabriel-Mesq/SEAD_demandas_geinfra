@@ -8,11 +8,9 @@
             <div class="card-body">
                 <h1 class="card-title text-center">Índice de Rotas</h1>
                 <ul class="list-group list-group-flush mt-4">
-                    <!-- Consultar Demandas -->
                     <li class="list-group-item text-center">
                         <a href="{{ url_for('consultar_demandas') }}" class="btn btn-link">Consultar Demandas</a>
                     </li>
-                    <!-- Cadastrar Demandas -->
                     <li class="list-group-item text-center">
                         <a href="{{ url_for('cadastro_demanda_form') }}" class="btn btn-link">Cadastrar Demandas</a>
                     </li>
@@ -21,9 +19,6 @@
                     </li>
                     <li class="list-group-item text-center">
                         <a href="{{ url_for('criar_ordem_servico') }}" class="btn btn-link">Criar Ordem de Serviço</a>
-                    </li>
-                    <li class="list-group-item text-center">
-                        <a href="{{ url_for('tecnico.cadastro_tecnico') }}" class="btn btn-link">Cadastro de Técnico</a>
                     </li>
                 </ul>
             </div>

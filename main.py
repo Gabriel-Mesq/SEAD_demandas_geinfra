@@ -221,7 +221,27 @@ def criar_ordem_servico():
 
     return render_template('criar_ordem_servico.html', unidades=unidades, todas_demandas=todas_demandas, tecnicos=tecnicos)
 
+@app.route('/tecnico_form', methods=['POST'])
+def tecnico_form():
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
 
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+
+        cursor.execute('INSERT INTO tecnico (nome) VALUES (%s)', (nome,))
+        tecnico_id = cursor.lastrowid
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({'success': True, 'tecnico_id': tecnico_id, 'nome': nome})
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({'success': False})
 
 @app.route('/get_demandas/<int:unidade_id>', methods=['GET'])
 def get_demandas(unidade_id):
