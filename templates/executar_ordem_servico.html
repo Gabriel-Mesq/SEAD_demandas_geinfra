@@ -65,6 +65,13 @@
 
 <script>
     document.getElementById('gerarPdfButton').addEventListener('click', function() {
+        const form = document.getElementById('ordemServicoForm');
+
+        if (form.checkValidity() === false) {
+            form.reportValidity();
+            return;
+        }
+
         const ordemServicoId = document.getElementById('ordem_servico_id').value;
         const numeroSei = document.getElementById('numero_sei').value;
         const dataExecucaoServico = document.getElementById('data_execucao_servico').value;
@@ -86,8 +93,5 @@
         window.open(url, '_blank');
     });
 </script>
-
-
-
 
 {% endblock %}
