@@ -8,6 +8,7 @@
                     <td style="text-align: center;">
                         <button class="btn btn-primary button-visualizar" data-id="{{ ordem.ordem_servico_id }}">Visualizar</button>
                         <a href="{{ url_for('gerar_pdf', ordem_servico_id=ordem.ordem_servico_id) }}" class="btn btn-secondary">Download PDF</a>
+                        <a href="{{ url_for('executar_ordem_servico', ordem_servico_id=ordem.ordem_servico_id) }}" class="btn btn-success btn-sm">Executar</a>
                     </td>
                 </tr>
                 {% endfor %}

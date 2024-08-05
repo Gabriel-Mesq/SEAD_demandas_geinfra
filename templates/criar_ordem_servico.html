@@ -25,11 +25,11 @@
             <option value="{{ tecnico.id }}">{{ tecnico.nome }}</option>
             {% endfor %}
         </select>
+        <button type="button" class="btn btn-secondary mt-2" data-toggle="modal" data-target="#addTecnicoModal">Adicionar Técnico</button>
     </div>
     <div class="form-group">
         <label for="demanda_ids">Demandas:</label>
         <select class="form-control" name="demanda_ids" id="demanda_ids" multiple required>
-
         </select>
     </div>
     <div class="form-group">
@@ -39,36 +39,116 @@
     <button type="submit" class="btn btn-primary">Confirmar Criação da Ordem de Serviço</button>
 </form>
 
+<div class="modal fade" id="addTecnicoModal" tabindex="-1" role="dialog" aria-labelledby="addTecnicoModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addTecnicoModalLabel">Adicionar Técnico</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="tecnicoForm">
+          <div class="form-group">
+            <label for="nome">Nome:</label>
+            <input type="text" class="form-control" id="nome" name="nome" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Cadastrar Técnico</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% if success %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     Swal.fire({
         title: 'Cadastro concluido!',
-        text: 'Técnico cadastrado com sucesso!',
+        text: 'Ordem de serviço registrada com sucesso!',
         icon: 'success',
         confirmButtonText: 'OK'
     });
 </script>
 {% endif %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
-document.getElementById('unidade_id').addEventListener('change', function() {
-    var unidadeId = this.value;
-    var demandaSelect = document.getElementById('demanda_ids');
+    document.addEventListener('DOMContentLoaded', function () {
+        var tecnicoChoices = new Choices('#tecnicos', {
+            removeItemButton: true,
+            placeholderValue: 'Selecione um técnico',
+            noResultsText: 'Nenhum resultado encontrado',
+            itemSelectText: 'Pressione para selecionar'
+        });
 
-    demandaSelect.innerHTML = '';
+        document.getElementById('unidade_id').addEventListener('change', function () {
+            var unidadeId = this.value;
+            var demandaSelect = document.getElementById('demanda_ids');
 
-    if (unidadeId) {
-        fetch('/get_demandas/' + unidadeId)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(demanda => {
-                    var option = document.createElement('option');
-                    option.value = demanda.id;
-                    option.text = demanda.descricao;
-                    demandaSelect.appendChild(option);
+            demandaSelect.innerHTML = '';
+
+            if (unidadeId) {
+                fetch('/get_demandas/' + unidadeId)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(demanda => {
+                            var option = document.createElement('option');
+                            option.value = demanda.id;
+                            option.text = demanda.descricao;
+                            demandaSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+
+        document.getElementById('tecnicoForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/tecnico_form', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        tecnicoChoices.setChoices([{
+                            value: data.tecnico_id,
+                            label: data.nome,
+                            selected: true
+                        }], 'value', 'label', true);
+
+                        $('#addTecnicoModal').modal('hide').on('hidden.bs.modal', function (e) {
+                            $('body').removeClass('modal-open');
+                            $('.modal-backdrop').remove();
+                        });
+                        this.reset();
+                        Swal.fire({
+                            title: 'Técnico Cadastrado!',
+                            text: 'O técnico foi adicionado com sucesso!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erro!',
+                            text: 'Ocorreu um erro ao cadastrar o técnico.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Erro!',
+                        text: 'Ocorreu um erro ao cadastrar o técnico.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 });
-            });
-    }
-});
+        });
+    });
 </script>
 {% endblock %}
