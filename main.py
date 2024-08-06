@@ -8,7 +8,7 @@ from config import get_db_connection
 app = Flask(__name__)
 
 # Configuração do pdfkit
-path_wkhtmltopdf = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
+path_wkhtmltopdf = '/app/bin/wkhtmltopdf'
 config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 
 register_blueprints(app)
