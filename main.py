@@ -3,16 +3,13 @@ import pdfkit
 import pymysql
 import logging
 from routes import register_blueprints
+from config import get_db_connection
 
 app = Flask(__name__)
 
 # Configuração do pdfkit
 path_wkhtmltopdf = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
 config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
-
-
-def get_db_connection():
-    return pymysql.connect(user='root', password='melhor1@', host='127.0.0.1', database='demandas_geinfra_prod')
 
 register_blueprints(app)
 
